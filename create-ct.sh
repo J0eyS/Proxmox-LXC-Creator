@@ -41,13 +41,21 @@ read -p "Enter Container Name (hostname): " CT_NAME
 read -p "Enter Network Bridge (default: vmbr0): " CT_BRIDGE
 CT_BRIDGE=${CT_BRIDGE:-vmbr0}
 
-read -p "Enter IP Address (e.g., 192.168.1.50/24 or 'dhcp'): " CT_IP
+# --- IPv4 Configuration ---
+read -p "Enter IPv4 Address (e.g., 192.168.1.50/24 or 'dhcp'): " CT_IP
 if [ "$CT_IP" != "dhcp" ] && [[ ! "$CT_IP" =~ "/" ]]; then
-    echo "❌ Error: Static IPs require a subnet mask (e.g., /24). Please run again."
+    echo "❌ Error: Static IPv4 require a subnet mask (e.g., /24). Please run again."
     exit 1
 fi
+read -p "Enter IPv4 Gateway (leave blank for DHCP): " CT_GW
 
-read -p "Enter Gateway IP (leave blank for DHCP): " CT_GW
+# --- IPv6 Configuration ---
+read -p "Enter IPv6 Address (e.g., 2001:db8::50/64, 'dhcp', or leave blank for none): " CT_IP6
+if [ -n "$CT_IP6" ] && [ "$CT_IP6" != "dhcp" ] && [[ ! "$CT_IP6" =~ "/" ]]; then
+    echo "❌ Error: Static IPv6 require a prefix length (e.g., /64). Please run again."
+    exit 1
+fi
+read -p "Enter IPv6 Gateway (leave blank if none): " CT_GW6
 
 read -p "Enter Disk Size in GB (default: 4): " CT_DISK
 CT_DISK=${CT_DISK:-4}
@@ -58,9 +66,17 @@ CT_STORE=${CT_STORE:-local-lvm}
 read -s -p "Enter root password for the new container: " CT_PASS
 echo ""
 
+# Formulate the full networking string
 NET_CONF="name=eth0,bridge=$CT_BRIDGE,ip=$CT_IP"
 if [ -n "$CT_GW" ] && [ "$CT_IP" != "dhcp" ]; then
     NET_CONF="$NET_CONF,gw=$CT_GW"
+fi
+
+if [ -n "$CT_IP6" ]; then
+    NET_CONF="$NET_CONF,ip6=$CT_IP6"
+    if [ -n "$CT_GW6" ] && [ "$CT_IP6" != "dhcp" ]; then
+        NET_CONF="$NET_CONF,gw6=$CT_GW6"
+    fi
 fi
 
 echo "----------------------------------------"
