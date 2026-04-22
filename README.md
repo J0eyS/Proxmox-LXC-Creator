@@ -7,7 +7,7 @@ An interactive bash script designed to run directly on a Proxmox VE host termina
 To install this tool on your Proxmox server, copy and paste this one-liner into your Proxmox host shell:
 
 ```bash
-curl -sSL https://githubusercontent.com | bash
+curl -sSL https://raw.githubusercontent.com/J0eyS/Proxmox-LXC-Creator/main/install.sh | bash
 ```
 
 ## 🛠️ Usage
